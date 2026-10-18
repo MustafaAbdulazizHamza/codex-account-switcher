@@ -17,8 +17,8 @@ jobs:
       matrix:
         python: ['3.10', '3.11', '3.12', '3.13', '3.14']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python }}
       - name: Check shell syntax
@@ -45,7 +45,7 @@ jobs:
             image: alpine:3.23
             setup: apk add --no-cache bash python3 ncurses-terminfo
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Test in distribution container
         env:
           TEST_IMAGE: ${{ matrix.image }}
