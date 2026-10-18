@@ -1,0 +1,61 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Check shell syntax
+        run: bash -n install.sh uninstall.sh
+      - name: Run isolated tests
+        env:
+          RUN_UNINSTALL_TESTS: '1'
+        run: python3 -m unittest discover -s tests -v
+
+  distributions:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Debian 12
+            image: debian:12-slim
+            setup: apt-get update && apt-get install -y --no-install-recommends bash python3 ncurses-term
+          - name: Fedora 43
+            image: fedora:43
+            setup: dnf install -y bash python3 ncurses-term
+          - name: Alpine 3.23 (switcher only)
+            image: alpine:3.23
+            setup: apk add --no-cache bash python3 ncurses-terminfo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test in distribution container
+        env:
+          TEST_IMAGE: ${{ matrix.image }}
+          TEST_SETUP: ${{ matrix.setup }}
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/project" -w /project \
+            -e RUN_UNINSTALL_TESTS=1 -e TEST_SETUP \
+            "$TEST_IMAGE" sh -ec '
+              eval "$TEST_SETUP"
+              bash -n install.sh uninstall.sh
+              python3 -m unittest discover -s tests -v
+            '

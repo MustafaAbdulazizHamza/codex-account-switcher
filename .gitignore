@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.coverage
+htmlcov/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+.DS_Store
+*.swp
+*.swo
+
+# Local account data and credentials must never be published.
+.codex/
+.codex-accounts/
+auth.json
+.account-labels.json
+.env
+.env.*
+*.pem
+*.key
+
+# Local assistant state and personal development notes.
+.agents/
+.claude/
+.codex-session/
